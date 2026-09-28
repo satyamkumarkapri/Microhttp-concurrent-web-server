@@ -58,3 +58,4 @@ tests/*.out
 *.pem
 *.key
 *.env
+build/
