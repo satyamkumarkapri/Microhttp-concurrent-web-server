@@ -10,7 +10,7 @@
  *   is correct before integrating with the HTTP server.
  *
  * Build: gcc -std=c11 -Wall -g -o build/test_path \
- *            tests/test_path.c src/file.c src/mime.c src/logger.c -I src/
+ *            tests/test_path.c src/file.c src/mime.c src/logger.c -Iinclude
  */
 
 

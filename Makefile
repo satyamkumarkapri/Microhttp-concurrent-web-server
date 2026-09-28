@@ -58,7 +58,7 @@ BASE_CFLAGS := \
     -Wformat=2          \
     -D_GNU_SOURCE       \
     -D_POSIX_C_SOURCE=200809L \
-    -I$(SRCDIR)
+    -Iinclude
 
 # Debug flags (default build)
 DEBUG_CFLAGS := $(BASE_CFLAGS) -g3 -O0 -DDEBUG

@@ -9,7 +9,7 @@
  * requests, percent-encoded paths, and various HTTP versions.
  *
  * Build: gcc -std=c11 -Wall -g -o build/test_parser \
- *            tests/test_parser.c src/parser.c src/logger.c -I src/
+ *            tests/test_parser.c src/parser.c src/logger.c -Iinclude
  */
 
 
