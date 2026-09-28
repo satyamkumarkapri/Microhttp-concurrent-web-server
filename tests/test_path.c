@@ -23,8 +23,8 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "file.h"
-#include "logger.h"
+#include "../include/file.h"
+#include "../include/logger.h"
 
 static int tests_run    = 0;
 static int tests_passed = 0;

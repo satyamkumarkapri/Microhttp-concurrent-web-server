@@ -18,8 +18,8 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include "parser.h"
-#include "logger.h"
+#include "../include/parser.h"
+#include "../include/logger.h"
 
 /* ─── Test harness ────────────────────────────────────────────────────────── */
 
