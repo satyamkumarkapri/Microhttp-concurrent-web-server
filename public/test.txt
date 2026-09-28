@@ -1,0 +1,2 @@
+This is a plain text test file served by MICROHTTP.
+MICROHTTP range test content. ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789

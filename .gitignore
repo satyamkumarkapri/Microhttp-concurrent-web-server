@@ -1,0 +1,60 @@
+# ─── Build Artifacts ───────────────────────────────────────────────────────────
+*.o
+*.a
+*.so
+*.out
+
+# Compiled binaries
+microhttp
+microhttp_debug
+
+# ─── Object / Dependency files ─────────────────────────────────────────────────
+*.d
+*.lo
+*.la
+
+# ─── Benchmark output ──────────────────────────────────────────────────────────
+benchmark/results/*.txt
+benchmark/results/*.log
+benchmark/results/*.csv
+
+# ─── Logs ──────────────────────────────────────────────────────────────────────
+*.log
+logs/
+
+# ─── Valgrind output ───────────────────────────────────────────────────────────
+valgrind-*.txt
+vg-*.txt
+
+# ─── macOS System Files ────────────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ─── IDE / Editor ──────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.orig
+*.bak
+
+# ─── Temporary files ───────────────────────────────────────────────────────────
+tmp/
+temp/
+*.tmp
+*.temp
+
+# ─── Test artifacts ────────────────────────────────────────────────────────────
+tests/output/
+tests/*.out
+
+# ─── Private / credentials ─────────────────────────────────────────────────────
+*.pem
+*.key
+*.env

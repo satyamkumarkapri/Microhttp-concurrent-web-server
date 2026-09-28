@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="MICROHTTP — A Concurrent HTTP/1.1 Web Server demonstrating TCP sockets, thread pools, epoll, and Linux systems programming concepts.">
+    <title>MICROHTTP — Concurrent HTTP/1.1 Web Server</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ═══ Hero Section ═══════════════════════════════════════════════════════ -->
+<header class="hero">
+    <div class="hero-bg"></div>
+    <div class="container">
+        <div class="hero-content">
+            <div class="badge">OS &amp; Systems Programming Project</div>
+            <h1 class="hero-title">
+                <span class="accent">MICRO</span>HTTP
+            </h1>
+            <p class="hero-subtitle">
+                Concurrent HTTP/1.1 Web Server
+            </p>
+            <p class="hero-desc">
+                A production-style web server built from scratch using Linux system calls,
+                POSIX threads, and the epoll event notification interface.
+                No frameworks. No magic. Pure C11.
+            </p>
+            <div class="hero-tags">
+                <span class="tag">C11</span>
+                <span class="tag">TCP Sockets</span>
+                <span class="tag">POSIX Threads</span>
+                <span class="tag">epoll</span>
+                <span class="tag">HTTP/1.1</span>
+                <span class="tag">Linux</span>
+            </div>
+            <div class="hero-actions">
+                <a href="#architecture" class="btn btn-primary">Explore Architecture</a>
+                <a href="#features" class="btn btn-outline">View Features</a>
+            </div>
+        </div>
+        <div class="hero-visual">
+            <div class="terminal">
+                <div class="terminal-bar">
+                    <span class="dot red"></span>
+                    <span class="dot yellow"></span>
+                    <span class="dot green"></span>
+                    <span class="terminal-title">bash — microhttp</span>
+                </div>
+                <div class="terminal-body">
+                    <div class="line"><span class="prompt">$</span> <span class="cmd">./microhttp --mode threadpool --port 8080 --workers 8</span></div>
+                    <div class="line output">[INFO] Starting MICROHTTP</div>
+                    <div class="line output">[INFO] Mode:            threadpool</div>
+                    <div class="line output">[INFO] Port:            8080</div>
+                    <div class="line output">[INFO] Document root:   ./public</div>
+                    <div class="line output">[INFO] Workers:         8</div>
+                    <div class="line output">[INFO] Queue size:      128</div>
+                    <div class="line output">[INFO] Listening on 0.0.0.0:8080</div>
+                    <div class="line output">[INFO] Thread pool started: 8 workers</div>
+                    <div class="line output">[INFO] Client connected: 127.0.0.1:52341</div>
+                    <div class="line output">[INFO] GET /index.html → 200 (2048 bytes)</div>
+                    <div class="line output">[INFO] GET /style.css → 200 (4096 bytes)</div>
+                    <div class="line cursor-line"><span class="cursor">█</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- ═══ Server Mode Selector ═══════════════════════════════════════════════ -->
+<section class="modes-section" id="modes">
+    <div class="container">
+        <h2 class="section-title">Three Concurrency <span class="accent">Models</span></h2>
+        <p class="section-desc">Compare real implementations — not simulations</p>
+
+        <div class="modes-grid">
+            <div class="mode-card" id="mode-single">
+                <div class="mode-icon">①</div>
+                <h3>Single-Threaded</h3>
+                <p class="mode-subtitle">Baseline Model</p>
+                <p>One client at a time. The simplest architecture — pure socket
+                accept/read/write loop. Useful for benchmarking overhead of concurrent modes.</p>
+                <div class="mode-cmd">
+                    <code>./microhttp --mode single --port 8080</code>
+                </div>
+                <div class="mode-os">
+                    <div class="os-concept"><span>OS: </span>socket, bind, listen, accept</div>
+                </div>
+            </div>
+
+            <div class="mode-card featured" id="mode-threadpool">
+                <div class="mode-badge">Recommended</div>
+                <div class="mode-icon">②</div>
+                <h3>Thread Pool</h3>
+                <p class="mode-subtitle">Concurrent Model</p>
+                <p>Pre-created worker threads consume jobs from a bounded queue.
+                Backpressure prevents unbounded memory usage. Handles many simultaneous clients.</p>
+                <div class="mode-cmd">
+                    <code>./microhttp --mode threadpool --workers 8</code>
+                </div>
+                <div class="mode-os">
+                    <div class="os-concept"><span>OS: </span>pthread_create, mutex, cond_wait</div>
+                </div>
+            </div>
+
+            <div class="mode-card" id="mode-epoll">
+                <div class="mode-icon">③</div>
+                <h3>epoll Event Loop</h3>
+                <p class="mode-subtitle">Linux Event-Driven</p>
+                <p>Single thread manages thousands of non-blocking sockets via the Linux
+                epoll interface. O(active events) complexity. Integrated timerfd for idle timeouts.</p>
+                <div class="mode-cmd">
+                    <code>./microhttp --mode epoll --port 8080</code>
+                </div>
+                <div class="mode-os">
+                    <div class="os-concept"><span>OS: </span>epoll_create1, epoll_ctl, epoll_wait</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══ Features ═══════════════════════════════════════════════════════════ -->
+<section class="features-section" id="features">
+    <div class="container">
+        <h2 class="section-title">HTTP/1.1 <span class="accent">Features</span></h2>
+        <div class="features-grid">
+            <div class="feature-item">
+                <div class="feature-icon">⚡</div>
+                <h4>Streaming Parser</h4>
+                <p>Handles partial recv() correctly. Parser accumulates bytes across multiple system calls.</p>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">🔒</div>
+                <h4>Path Security</h4>
+                <p>realpath() canonicalization blocks directory traversal, encoded attacks like %2F.</p>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">♻️</div>
+                <h4>Keep-Alive</h4>
+                <p>HTTP/1.1 persistent connections. Multiple requests per TCP connection.</p>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">📦</div>
+                <h4>Range Requests</h4>
+                <p>RFC 7233 Range: bytes=start-end. Returns 206 Partial Content with Content-Range.</p>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">🕐</div>
+                <h4>Conditional GET</h4>
+                <p>If-Modified-Since support. Returns 304 Not Modified for unchanged resources.</p>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">⏱️</div>
+                <h4>Idle Timeout</h4>
+                <p>timerfd-based idle connection detection. Sends 408 and frees resources cleanly.</p>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">🛑</div>
+                <h4>Graceful Shutdown</h4>
+                <p>SIGINT/SIGTERM via signalfd. Drains in-flight requests, joins threads, frees memory.</p>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">🚀</div>
+                <h4>Zero-Copy Transfer</h4>
+                <p>sendfile() syscall transfers file data kernel→socket without user-space copy.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══ Architecture Diagram ═══════════════════════════════════════════════ -->
+<section class="arch-section" id="architecture">
+    <div class="container">
+        <h2 class="section-title">System <span class="accent">Architecture</span></h2>
+
+        <div class="arch-tabs">
+            <button class="tab-btn active" onclick="showArch('threadpool')">Thread Pool</button>
+            <button class="tab-btn" onclick="showArch('epoll')">epoll</button>
+            <button class="tab-btn" onclick="showArch('connection')">Connection FSM</button>
+        </div>
+
+        <div class="arch-content" id="arch-threadpool">
+            <div class="arch-diagram">
+                <div class="arch-box listener">
+                    <strong>accept()</strong><br>Main Thread
+                </div>
+                <div class="arch-arrow">↓</div>
+                <div class="arch-box queue">
+                    <strong>Bounded Job Queue</strong><br>
+                    pthread_mutex + pthread_cond<br>
+                    Backpressure when full
+                </div>
+                <div class="arch-arrow">↓</div>
+                <div class="arch-workers">
+                    <div class="arch-box worker">Worker 1<br>recv→parse→respond</div>
+                    <div class="arch-box worker">Worker 2<br>recv→parse→respond</div>
+                    <div class="arch-box worker">Worker 3<br>recv→parse→respond</div>
+                    <div class="arch-box worker">Worker N<br>recv→parse→respond</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="arch-content hidden" id="arch-epoll">
+            <div class="arch-diagram">
+                <div class="arch-box listener">listen_fd<br>(non-blocking)</div>
+                <div class="arch-arrow">↓ EPOLLIN</div>
+                <div class="arch-box queue" style="background: rgba(168,85,247,0.15); border-color: rgba(168,85,247,0.4)">
+                    <strong>epoll_wait()</strong><br>
+                    Single thread — event loop<br>
+                    O(active events) complexity
+                </div>
+                <div class="arch-arrow">↓</div>
+                <div class="arch-workers">
+                    <div class="arch-box worker" style="border-color:rgba(168,85,247,0.4)">client_fd₁<br>EPOLLIN|EPOLLRDHUP</div>
+                    <div class="arch-box worker" style="border-color:rgba(168,85,247,0.4)">client_fd₂<br>EPOLLIN|EPOLLRDHUP</div>
+                    <div class="arch-box worker" style="border-color:rgba(168,85,247,0.4)">timerfd<br>idle scan</div>
+                    <div class="arch-box worker" style="border-color:rgba(168,85,247,0.4)">signalfd<br>SIGINT/SIGTERM</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="arch-content hidden" id="arch-connection">
+            <div class="fsm-diagram">
+                <div class="fsm-state">CONN_READING</div>
+                <div class="fsm-arrow">full request received ↓</div>
+                <div class="fsm-state">CONN_PROCESSING</div>
+                <div class="fsm-arrow">response built ↓</div>
+                <div class="fsm-state">CONN_WRITING</div>
+                <div class="fsm-branch">
+                    <div class="fsm-branch-item">
+                        <div class="fsm-arrow">keep-alive ↓</div>
+                        <div class="fsm-state">CONN_KEEP_ALIVE</div>
+                        <div class="fsm-arrow">→ back to READING</div>
+                    </div>
+                    <div class="fsm-branch-item">
+                        <div class="fsm-arrow">Connection: close ↓</div>
+                        <div class="fsm-state closing">CONN_CLOSING</div>
+                        <div class="fsm-arrow">close(fd) + free(conn)</div>
+                    </div>
+                    <div class="fsm-branch-item">
+                        <div class="fsm-arrow">idle timeout ↓</div>
+                        <div class="fsm-state timeout">CONN_TIMEOUT</div>
+                        <div class="fsm-arrow">408 → CLOSING</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══ OS Concepts ════════════════════════════════════════════════════════ -->
+<section class="concepts-section">
+    <div class="container">
+        <h2 class="section-title">OS Concepts <span class="accent">Demonstrated</span></h2>
+        <div class="concepts-grid">
+            <div class="concept-card">
+                <div class="concept-week">Week 1</div>
+                <h4>Syscall Boundary</h4>
+                <p>socket(), bind(), listen(), accept() — transitioning from user mode to kernel mode for network I/O</p>
+            </div>
+            <div class="concept-card">
+                <div class="concept-week">Week 2</div>
+                <h4>Memory Model</h4>
+                <p>Explicit heap ownership. connection_t allocated per-connection, freed by exact owner thread.</p>
+            </div>
+            <div class="concept-card">
+                <div class="concept-week">Week 3</div>
+                <h4>Parsing / I/O Streams</h4>
+                <p>Streaming HTTP parser handles partial recv() — TCP delivers bytes, not messages.</p>
+            </div>
+            <div class="concept-card">
+                <div class="concept-week">Week 4</div>
+                <h4>Thread Pool</h4>
+                <p>pthread_create + bounded queue + mutex/condvar. Workers drain a job queue concurrently.</p>
+            </div>
+            <div class="concept-card">
+                <div class="concept-week">Week 6</div>
+                <h4>Signals + timers</h4>
+                <p>signalfd + timerfd on Linux. Signal-safe shutdown. Idle timeouts via epoll-integrated timers.</p>
+            </div>
+            <div class="concept-card">
+                <div class="concept-week">Week 9</div>
+                <h4>File Descriptors</h4>
+                <p>stat(), fstat(), open(), sendfile() — zero-copy file transfer. Range requests with lseek().</p>
+            </div>
+            <div class="concept-card">
+                <div class="concept-week">Week 10</div>
+                <h4>epoll</h4>
+                <p>epoll_create1, epoll_ctl, epoll_wait. O(active) event polling. Edge-triggered mode.</p>
+            </div>
+            <div class="concept-card">
+                <div class="concept-week">Week 11</div>
+                <h4>Deadlock Avoidance</h4>
+                <p>Single lock order, bounded queue prevents unbounded resource use. Race-free shared state.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══ HTTP Status Codes ═══════════════════════════════════════════════ -->
+<section class="status-section">
+    <div class="container">
+        <h2 class="section-title">HTTP Status <span class="accent">Codes</span></h2>
+        <div class="status-grid">
+            <div class="status-card ok"><span class="status-code">200</span> OK</div>
+            <div class="status-card ok"><span class="status-code">206</span> Partial Content</div>
+            <div class="status-card redirect"><span class="status-code">304</span> Not Modified</div>
+            <div class="status-card error"><span class="status-code">400</span> Bad Request</div>
+            <div class="status-card error"><span class="status-code">403</span> Forbidden</div>
+            <div class="status-card error"><span class="status-code">404</span> Not Found</div>
+            <div class="status-card error"><span class="status-code">405</span> Method Not Allowed</div>
+            <div class="status-card error"><span class="status-code">408</span> Request Timeout</div>
+            <div class="status-card server-error"><span class="status-code">500</span> Internal Error</div>
+            <div class="status-card server-error"><span class="status-code">501</span> Not Implemented</div>
+            <div class="status-card server-error"><span class="status-code">505</span> Version Not Supported</div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══ Footer ════════════════════════════════════════════════════════════ -->
+<footer class="footer">
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-left">
+                <span class="footer-title">MICROHTTP</span>
+                <p>B.Tech CSE — OS &amp; Systems Programming</p>
+            </div>
+            <div class="footer-right">
+                <div class="footer-links">
+                    <a href="/test.txt">test.txt</a>
+                    <a href="/script.js">script.js</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>Built with C11, Linux syscalls, and no external frameworks.</p>
+        </div>
+    </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
