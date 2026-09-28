@@ -86,19 +86,31 @@ CONN_WRITING
 
 ```
 microhttp-concurrent-web-server/
-├── src/
+├── include/                Header files
+│   ├── server.h            TCP listener, mode dispatcher
+│   ├── http.h              HTTP response builder
+│   ├── parser.h            Streaming HTTP/1.1 request parser
+│   ├── connection.h        Connection state machine
+│   ├── file.h              Path resolution, sendfile(), Range
+│   ├── thread_pool.h       Bounded thread pool
+│   ├── epoll_server.h      Linux epoll event loop
+│   ├── signal_handler.h    signalfd / self-pipe shutdown
+│   ├── timer.h             timerfd idle timeout
+│   ├── mime.h              MIME type detection
+│   └── logger.h            Thread-safe logging
+├── src/                    Source implementations
 │   ├── main.c              CLI entry point, getopt_long parsing
-│   ├── server.c / .h       TCP listener, mode dispatcher
-│   ├── http.c / .h         HTTP response builder
-│   ├── parser.c / .h       Streaming HTTP/1.1 request parser
-│   ├── connection.c / .h   Connection state machine
-│   ├── file.c / .h         Path resolution, sendfile(), Range
-│   ├── thread_pool.c / .h  Bounded thread pool
-│   ├── epoll_server.c / .h Linux epoll event loop
-│   ├── signal_handler.c/h  signalfd / self-pipe shutdown
-│   ├── timer.c / .h        timerfd idle timeout
-│   ├── mime.c / .h         MIME type detection
-│   └── logger.c / .h       Thread-safe logging
+│   ├── server.c            TCP listener, mode dispatcher
+│   ├── http.c              HTTP response builder
+│   ├── parser.c            Streaming HTTP/1.1 request parser
+│   ├── connection.c        Connection state machine
+│   ├── file.c              Path resolution, sendfile(), Range
+│   ├── thread_pool.c       Bounded thread pool
+│   ├── epoll_server.c      Linux epoll event loop
+│   ├── signal_handler.c    signalfd / self-pipe shutdown
+│   ├── timer.c             timerfd idle timeout
+│   ├── mime.c              MIME type detection
+│   └── logger.c            Thread-safe logging
 ├── tests/
 │   ├── test_parser.c       HTTP parser unit tests
 │   ├── test_path.c         Path security unit tests
