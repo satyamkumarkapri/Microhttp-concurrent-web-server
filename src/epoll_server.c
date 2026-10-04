@@ -85,18 +85,7 @@ static int epoll_add(int epfd, int fd, uint32_t events, void *ptr)
     return 0;
 }
 
-static int epoll_mod(int epfd, int fd, uint32_t events, void *ptr)
-{
-    struct epoll_event ev;
-    memset(&ev, 0, sizeof(ev));
-    ev.events   = events;
-    ev.data.ptr = ptr;
-    if (epoll_ctl(epfd, EPOLL_CTL_MOD, fd, &ev) < 0) {
-        LOG_SYSERR("epoll_ctl MOD");
-        return -1;
-    }
-    return 0;
-}
+
 
 static void epoll_del(int epfd, int fd)
 {
@@ -120,7 +109,7 @@ static void close_connection(int epfd, connection_t *conn)
  *
  * Returns 1 if the connection should remain open, 0 if it should be closed.
  */
-static int handle_read(int epfd, connection_t *conn,
+static int handle_read(connection_t *conn,
                        const char *doc_root, int idle_timeout)
 {
     char buf[4096];
@@ -132,7 +121,7 @@ static int handle_read(int epfd, connection_t *conn,
             if (errno == EAGAIN || errno == EWOULDBLOCK)
                 break;   /* no more data right now — edge-triggered done */
             if (errno == EINTR) continue;
-            LOG_DEBUG("recv error fd=%d: %m", conn->fd);
+            LOG_DEBUG("recv error fd=%d: %s", conn->fd, strerror(errno));
             return 0;
         }
         if (nr == 0) {
@@ -341,7 +330,7 @@ int epoll_server_run(const epoll_server_config_t *cfg)
             if (ev & (EPOLLHUP | EPOLLRDHUP | EPOLLERR)) {
                 should_close = 1;
             } else if (ev & EPOLLIN) {
-                int ok = handle_read(epfd, conn,
+                int ok = handle_read(conn,
                                      cfg->doc_root, cfg->idle_timeout);
                 if (!ok) should_close = 1;
             }

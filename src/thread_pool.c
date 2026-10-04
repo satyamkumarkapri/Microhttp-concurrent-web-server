@@ -119,7 +119,7 @@ static void handle_connection_blocking(int client_fd, const char *doc_root,
                     return;
                 }
                 if (errno == EINTR) continue;
-                LOG_DEBUG("recv error on fd=%d: %m", client_fd);
+                LOG_DEBUG("recv error on fd=%d: %s", client_fd, strerror(errno));
                 return;
             }
             if (nr == 0) {

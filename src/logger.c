@@ -2,14 +2,14 @@
  * logger.c — MICROHTTP Logging Implementation
  *
  * Thread-safe logging using flockfile/funlockfile (POSIX).
- * Uses %m format specifier (glibc extension) for strerror(errno).
+ * Uses strerror(errno) for system error messages.
  *
  * OS Concept: stdio locking — POSIX guarantees that individual stdio
  * operations on the same FILE* are atomic (protected internally), but
  * we use flockfile to make the entire formatted line atomic across threads.
  */
 
-/* _GNU_SOURCE is set via Makefile -D flag; enables %m in printf on Linux */
+/* _GNU_SOURCE is set via Makefile -D flag */
 
 #include "logger.h"
 

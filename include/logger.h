@@ -16,6 +16,8 @@
 
 #include <stdio.h>
 #include <time.h>
+#include <string.h>
+#include <errno.h>
 
 /* Log level constants — lower value = more verbose */
 typedef enum {
@@ -36,37 +38,26 @@ void log_write(log_level_t level, const char *file, int line,
 
 /* Public macros ─────────────────────────────────────────────────────────── */
 /*
- * We use __VA_OPT__(,) to handle the zero-argument case portably.
- * This avoids the non-standard GNU ## __VA_ARGS__ extension.
- * __VA_OPT__ requires C23 or GNU C11 extension. As a simpler portable
- * alternative, we always require at least one variadic argument (the format
- * string already counts). In practice every call site has a format string
- * so ##__VA_ARGS__ is fine on GCC/Clang; we suppress the pedantic warning.
+ * Variadic macro handling for -std=c11 -Wpedantic:
+ * We omit the named 'fmt' parameter and just pass __VA_ARGS__ to log_write.
+ * This requires callers to provide at least a format string, satisfying C99's
+ * requirement that variadic macros receive at least one argument.
  */
-#ifdef __GNUC__
-#  pragma GCC diagnostic push
-#  pragma GCC diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
-#  pragma GCC diagnostic ignored "-Wvariadic-macros"
-#endif
 
-#define LOG_DEBUG(fmt, ...) \
-    log_write(LOG_LEVEL_DEBUG, __FILE__, __LINE__, fmt, ##__VA_ARGS__)
+#define LOG_DEBUG(...) \
+    log_write(LOG_LEVEL_DEBUG, __FILE__, __LINE__, __VA_ARGS__)
 
-#define LOG_INFO(fmt, ...) \
-    log_write(LOG_LEVEL_INFO,  __FILE__, __LINE__, fmt, ##__VA_ARGS__)
+#define LOG_INFO(...) \
+    log_write(LOG_LEVEL_INFO,  __FILE__, __LINE__, __VA_ARGS__)
 
-#define LOG_WARN(fmt, ...) \
-    log_write(LOG_LEVEL_WARN,  __FILE__, __LINE__, fmt, ##__VA_ARGS__)
+#define LOG_WARN(...) \
+    log_write(LOG_LEVEL_WARN,  __FILE__, __LINE__, __VA_ARGS__)
 
-#define LOG_ERROR(fmt, ...) \
-    log_write(LOG_LEVEL_ERROR, __FILE__, __LINE__, fmt, ##__VA_ARGS__)
+#define LOG_ERROR(...) \
+    log_write(LOG_LEVEL_ERROR, __FILE__, __LINE__, __VA_ARGS__)
 
 /* Convenience: log a system error using errno */
 #define LOG_SYSERR(msg) \
-    log_write(LOG_LEVEL_ERROR, __FILE__, __LINE__, "%s: %m", (msg))
-
-#ifdef __GNUC__
-#  pragma GCC diagnostic pop
-#endif
+    log_write(LOG_LEVEL_ERROR, __FILE__, __LINE__, "%s: %s", (msg), strerror(errno))
 
 #endif /* MICROHTTP_LOGGER_H */
