@@ -424,7 +424,8 @@ Signal handlers run asynchronously and cannot safely call most library functions
 
 | Member | Component |
 |--------|-----------|
-| (Add your name) | (Add your contributions) |
+| Satyam | (       ) |
+| Rishika | (       ) |
 
 ---
 
