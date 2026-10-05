@@ -260,6 +260,68 @@ make help
 
 ## Testing
 
+### Start the Server
+
+```bash
+cd ~/Microhttp-concurrent-web-server
+./build/microhttp --mode threadpool --port 8080 --root ./public --workers 4
+
+GET Request
+curl -i http://localhost:8080/
+
+GET Static Text File
+curl -i http://localhost:8080/test.txt
+
+GET CSS File
+curl -i http://localhost:8080/style.css
+
+GET JavaScript File
+curl -i http://localhost:8080/script.js
+
+Test 404 Not Found
+curl -i http://localhost:8080/notfound.txt
+
+Test Path Traversal Protection
+curl -i --path-as-is "http://localhost:8080/../../etc/passwd"
+
+Test Range Request (206 Partial Content)
+curl -i -H "Range: bytes=0-99" http://localhost:8080/large-test-file.txt
+
+Test Conditional GET (304 Not Modified)
+curl -i -H "If-Modified-Since: Sun, 04 Oct 2026 10:00:00 GMT" http://localhost:8080/index.html
+
+Test Malformed HTTP Request (400 Bad Request)
+printf 'BAD REQUEST\r\n\r\n' | nc localhost 8080
+
+Benchmarking
+Single-Threaded Mode
+./build/microhttp --mode single --port 8080 --root ./public
+
+wrk -t4 -c100 -d10s --latency http://localhost:8080/
+
+Thread Pool - 4 Workers
+./build/microhttp --mode threadpool --port 8080 --root ./public --workers 4
+
+wrk -t4 -c100 -d10s --latency http://localhost:8080/
+
+Thread Pool - 8 Workers
+./build/microhttp --mode threadpool --port 8080 --root ./public --workers 8
+
+wrk -t4 -c100 -d10s --latency http://localhost:8080/
+
+Epoll Mode
+./build/microhttp --mode epoll --port 8080 --root ./public
+
+wrk -t4 -c100 -d10s --latency http://localhost:8080/
+
+Valgrind Memory and File Descriptor Check
+valgrind --leak-check=full --track-fds=yes ./build/microhttp --mode single --port 8080 --root ./public
+
+In another terminal:
+curl -i http://localhost:8080/
+
+Then stop the server with:
+Ctrl+C
 ### Unit Tests (C)
 ```bash
 make test
