@@ -207,7 +207,13 @@ make help
   --timeout 30 \
   --max-connections 2048
 ```
+###Stopping a server
 
+```bash
+ pgrep -a microhttp --> get pid
+ sudo kill -9 pid
+ verify-sudo ss -ltnp | grep :8080
+```
 ### CLI Reference
 
 | Option | Default | Description |
